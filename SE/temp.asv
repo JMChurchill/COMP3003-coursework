@@ -1,0 +1,134 @@
+%select the number of clusters you want to identify in your data.
+%this is the k in k-means clustering
+k=3;
+max_iterations = 10;
+newCluster1 = [];
+newCluster2 = [];
+newCluster3 = [];
+%done=false;
+c1Distance = [];
+c2Distance = [];
+c3Distance = [];
+
+for j = 1:max_iterations
+    done = false;
+    iteration=0;
+    totalDistances = [];
+    totalDistance = 0;
+    %step2 randomly select 3 destinct datapoints -> these are the initical clusters
+    
+    centroid1 = (randi([1,size(ConCluster,2)],1));
+    centroid2 = (randi([1,size(ConCluster,2)],1));
+    centroid3 = (randi([1,size(ConCluster,2)],1));
+    for i  = 1:size(ConCluster,2)
+        %step 3 Measure the distances between the 1st point and the three initial
+        %clusters
+        dist1 = sqrt((ConCluster(1,centroid1)-ConCluster(1,i))^2+(ConCluster(2,centroid1)-ConCluster(2,i))^2);
+        dist2 = sqrt((ConCluster(1,centroid2)-ConCluster(1,i))^2+(ConCluster(2,centroid2)-ConCluster(2,i))^2);
+        dist3 = sqrt((ConCluster(1,centroid3)-ConCluster(1,i))^2+(ConCluster(2,centroid3)-ConCluster(2,i))^2);
+
+        %step 4 Assign the first point to the nearest cluster -> do the same for
+        %the next point
+        %-> measure the distances and assign the point to the nearest cluster
+        if dist1 < dist2 && dist1 < dist3
+            newCluster1 = [newCluster1, [ConCluster(1,i);ConCluster(2,i)]];
+            totalDistance = totalDistance + dist1;
+        elseif (dist2 < dist3 && dist2 < dist1)
+            newCluster2 = [newCluster2, [ConCluster(1,i);ConCluster(2,i)]];
+            totalDistance = totalDistance + dist2;
+        else
+            newCluster3 = [newCluster3, [ConCluster(1,i);ConCluster(2,i)]];
+            totalDistance = totalDistance + dist3;
+        end
+    end
+    totalDistances = [totalDistances,[iteration;totalDistance]];
+    oldCentroid1 = [ConCluster(1,centroid1);ConCluster(2,centroid1)];
+    oldCentroid2 = [ConCluster(1,centroid2);ConCluster(2,centroid2)];
+    oldCentroid3 = [ConCluster(1,centroid3);ConCluster(2,centroid3)];
+    while done==false
+        iteration = iteration +1;
+        totalDistance = 0;
+        %step 5 calculate the mean of each cluster
+        %repeat what just did (measure and cluster) using the mean values
+        %sum of rows
+        c1Size = size(newCluster1,2);
+        c2Size = size(newCluster2,2);
+        c3Size = size(newCluster3,2);
+        %total = c1Size+c2Size+c3Size;
+
+        newCentroid1 = [(sum(newCluster1(1,:)))/c1Size;(sum(newCluster1(2,:)))/c1Size];
+        newCentroid2 = [(sum(newCluster2(1,:)))/c2Size;(sum(newCluster2(2,:)))/c2Size];
+        newCentroid3 = [(sum(newCluster3(1,:)))/c3Size;(sum(newCluster3(2,:)))/c3Size];
+        
+        newCluster1 = [];
+        newCluster2 = [];
+        newCluster3 = [];
+        for i  = 1:size(ConCluster,2)
+            dist1 = sqrt((newCentroid1(1,1)-ConCluster(1,i))^2+(newCentroid1(2,1)-ConCluster(2,i))^2);
+            dist2 = sqrt((newCentroid2(1,1)-ConCluster(1,i))^2+(newCentroid2(2,1)-ConCluster(2,i))^2);
+            dist3 = sqrt((newCentroid3(1,1)-ConCluster(1,i))^2+(newCentroid3(2,1)-ConCluster(2,i))^2);
+           
+            if dist1 < dist2 && dist1 < dist3
+                newCluster1 = [newCluster1, [ConCluster(1,i);ConCluster(2,i)]];
+                totalDistance = totalDistance + dist1;
+            elseif (dist2 < dist3 && dist2 < dist1)
+                newCluster2 = [newCluster2, [ConCluster(1,i);ConCluster(2,i)]];
+                totalDistance = totalDistance + dist2;
+            else
+                newCluster3 = [newCluster3, [ConCluster(1,i);ConCluster(2,i)]];
+                totalDistance = totalDistance + dist3;
+            end
+        end
+        totalDistances = [totalDistances,[iteration;totalDistance]];
+        totalDistance = 0;
+
+        %if clustering does not change during iteration then k-means is complete
+        if (oldCentroid1 == newCentroid1 & oldCentroid2 == newCentroid2 & oldCentroid3 == newCentroid3)
+            %stop 
+            done=true;
+            figure
+            hold on
+            plot(newCluster1(1,:),newCluster1(2,:),'b .')
+            plot(newCluster2(1,:),newCluster2(2,:),'r .')
+            plot(newCluster3(1,:),newCluster3(2,:),'g .')
+            plot(newCentroid1(1,1),newCentroid1(2,1),'black x','MarkerSize',15,'linewidth',4)
+            plot(newCentroid2(1,1),newCentroid2(2,1),'black x','MarkerSize',15,'linewidth',4)
+            plot(newCentroid3(1,1),newCentroid3(2,1),'black x','MarkerSize',15,'linewidth',4)
+            titleName = append('K Means Clustering, Iterations: ',int2str(iteration));
+            title(titleName)
+            legend('Cluster1','Cluster2','Cluster3','Centroid')
+            xlabel('x-value')
+            ylabel('y-value')
+            hold off
+            %plot distances and iterations
+            figure
+            title('Overall distances vs. number of iterations')
+            xlabel('Overall distances')
+            ylabel('Iterations')
+            plot(totalDistances(1,:),totalDistances(2,:),'o-')
+            grid on
+            grid minor
+            xlabel('Iterations')
+            ylabel('Overall distance')
+            totalDistances = [];
+        else
+            %continue
+            oldCentroid1 = newCentroid1;
+            oldCentroid2 = newCentroid2;
+            oldCentroid3 = newCentroid3;
+            done = false;
+        end
+    end
+        
+end
+newCluster1;
+newCluster2;
+newCluster3;
+
+
+%can assess the quality of the clustering by adding up the variation within
+%each cluster
+
+%keep track of these clusters and their total varience and do the whole
+%thing over with different starting points
+
