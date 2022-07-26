@@ -1,5 +1,6 @@
 # COMP3003-coursework
-Machine Learning Coursework. 
+This repository contains the code related to the machine learning module of my final year computer science degree. The code was complementary to Unsupervised Machine Learning and K-Means Clustering (Set Exercise) and Supervised and Reinforcement Machine Learning (Report).
+ 
 ## Contents
 * Set Exercise - K-means Clustering
 * Report - Pattern Recognition
